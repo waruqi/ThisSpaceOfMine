@@ -79,14 +79,18 @@ namespace tsom
 						serializer &= shipInputs.moveBackward;
 						serializer &= shipInputs.moveLeft;
 						serializer &= shipInputs.moveRight;
-						serializer &= shipInputs.moveUp;
-						serializer &= shipInputs.moveDown;
 						serializer &= shipInputs.rollLeft;
 						serializer &= shipInputs.rollRight;
-						serializer &= shipInputs.stabilize;
 
 						serializer &= shipInputs.pitch;
 						serializer &= shipInputs.yaw;
+
+						if (serializer.GetProtocolVersion() >= BuildVersion(0, 6, 1))
+						{
+							serializer &= shipInputs.moveUp;
+							serializer &= shipInputs.moveDown;
+							serializer &= shipInputs.stabilize;
+						}
 					}
 				});
 			}
