@@ -49,6 +49,7 @@ add_rules("plugin.vsxmake.autoupdate")
 add_rules("dbgdll", "natvis")
 
 --set_policy("package.requires_lock", true)
+set_policy("install.strip_packagelibs", false)
 
 set_project("ThisSpaceOfMine")
 set_version("0.0.0")
