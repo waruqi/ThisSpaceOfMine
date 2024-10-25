@@ -5,6 +5,7 @@
 #include <ClientLib/Systems/AnimationSystem.hpp>
 #include <ClientLib/Components/AnimationComponent.hpp>
 #include <Nazara/Core/Components/DisabledComponent.hpp>
+#include <entt/entt.hpp>
 
 namespace tsom
 {

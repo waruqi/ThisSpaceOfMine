@@ -21,6 +21,4 @@ namespace tsom
 	};
 }
 
-#include <ClientLib/Components/ChunkNetworkMapComponent.inl>
-
 #endif // TSOM_CLIENTLIB_COMPONENTS_CHUNKNETWORKMAPCOMPONENT_HPP

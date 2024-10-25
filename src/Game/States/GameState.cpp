@@ -12,7 +12,9 @@
 #include <ClientLib/Components/ClientEntityNetworkIndex.hpp>
 #include <ClientLib/Components/ClientInteractibleComponent.hpp>
 #include <ClientLib/Components/EnvironmentComponent.hpp>
+#include <ClientLib/Components/VisualEntityComponent.hpp>
 #include <ClientLib/Systems/AnimationSystem.hpp>
+#include <ClientLib/Systems/CameraFollowerSystem.hpp>
 #include <CommonLib/GameConstants.hpp>
 #include <CommonLib/InternalConstants.hpp>
 #include <CommonLib/NetworkSession.hpp>
@@ -198,6 +200,11 @@ namespace tsom
 
 			auto& cameraNode = m_cameraEntity.get<Nz::NodeComponent>();
 			cameraNode.SetRotation(cameraRotation);
+
+			// Update visual entity as well
+			auto& entityVisualComp = m_controlledEntity.get<VisualEntityComponent>();
+			auto& visualNode = entityVisualComp.visualEntity.get<Nz::NodeComponent>();
+			visualNode.CopyLocalTransform(characterNode);
 
 #if DEBUG_ROTATION
 			Nz::EulerAnglesf err = m_predictedCameraRotation - currentRotation;
@@ -915,6 +922,9 @@ namespace tsom
 
 			m_currentShipRotation = Nz::Quaternionf::Slerp(m_currentShipRotation, m_targetShipRotation, factor);
 		}
+
+
+		GetStateData().world->GetSystem<CameraFollowerSystem>().SetCameraPosition(m_cameraEntity.get<Nz::NodeComponent>().GetGlobalPosition());
 
 		return true;
 	}

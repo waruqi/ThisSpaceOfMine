@@ -3,8 +3,8 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include <CommonLib/EntityRegistry.hpp>
-#include <CommonLib/Entities/EntityClassLibrary.hpp>
 #include <CommonLib/Components/ClassInstanceComponent.hpp>
+#include <CommonLib/Entities/EntityClassLibrary.hpp>
 #include <entt/entt.hpp>
 
 namespace tsom

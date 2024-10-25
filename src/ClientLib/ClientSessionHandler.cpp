@@ -8,10 +8,14 @@
 #include <ClientLib/PlayerAnimationController.hpp>
 #include <ClientLib/RenderConstants.hpp>
 #include <ClientLib/Components/AnimationComponent.hpp>
+#include <ClientLib/Components/CameraFollowerComponent.hpp>
 #include <ClientLib/Components/ChunkNetworkMapComponent.hpp>
 #include <ClientLib/Components/ClientEntityNetworkIndex.hpp>
 #include <ClientLib/Components/EnvironmentComponent.hpp>
-#include <ClientLib/Components/MovementInterpolationComponent.hpp>
+#include <ClientLib/Components/NetworkInterpolationComponent.hpp>
+#include <ClientLib/Components/PhysicsInterpolationComponent.hpp>
+#include <ClientLib/Components/TransformCopyComponent.hpp>
+#include <ClientLib/Components/VisualEntityComponent.hpp>
 #include <ClientLib/Entities/ClientChunkClassLibrary.hpp>
 #include <ClientLib/Scripting/ClientEntityScriptingLibrary.hpp>
 #include <ClientLib/Scripting/ClientScriptingLibrary.hpp>
@@ -23,8 +27,8 @@
 #include <CommonLib/Components/EntityOwnerComponent.hpp>
 #include <CommonLib/Components/PlanetComponent.hpp>
 #include <CommonLib/Components/ShipComponent.hpp>
-#include <CommonLib/Scripting/SharedEntityScriptingLibrary.hpp>
 #include <CommonLib/Scripting/MathScriptingLibrary.hpp>
+#include <CommonLib/Scripting/SharedEntityScriptingLibrary.hpp>
 #include <Nazara/Core/ApplicationBase.hpp>
 #include <Nazara/Core/EnttWorld.hpp>
 #include <Nazara/Core/FilesystemAppComponent.hpp>
@@ -221,7 +225,7 @@ namespace tsom
 		auto& environment = *m_environments[debugDrawLineList.environmentId];
 
 		auto& entityNode = debugEntity.emplace<Nz::NodeComponent>(debugDrawLineList.position, debugDrawLineList.rotation);
-		entityNode.SetParent(environment.rootNode);
+		entityNode.SetParent(environment.rootEntity);
 
 		auto& gfxComponent = debugEntity.emplace<Nz::GraphicsComponent>();
 		gfxComponent.AttachRenderable(std::move(debugModel), tsom::Constants::RenderMask3D);
@@ -248,14 +252,29 @@ namespace tsom
 			auto& environment = *m_environments[entityData.environmentId];
 			environment.entities.UnboundedSet(entityData.entityId);
 
+			// Create logical entity
 			auto& entityNode = entity.emplace<Nz::NodeComponent>(entityData.initialStates.position, entityData.initialStates.rotation);
-			entityNode.SetParent(environment.rootNode);
+			entityNode.SetParent(environment.rootEntity);
 
 			auto& entityEnv = entity.emplace<EnvironmentComponent>();
 			entityEnv.environmentIndex = entityData.environmentId;
 
 			auto& entityNetId = entity.emplace<ClientEntityNetworkIndex>();
 			entityNetId.networkIndex = entityData.entityId;
+
+			// Create visual entity
+			entt::handle visualEntity = m_world.CreateEntity();
+
+			auto& visualNode = visualEntity.emplace<Nz::NodeComponent>(entityData.initialStates.position, entityData.initialStates.rotation);
+			visualNode.SetParent(environment.visualRootEntity);
+
+			// Bind visual entity to logical entity
+			auto& entityVisualComp = entity.emplace<VisualEntityComponent>();
+			entityVisualComp.visualEntity = visualEntity;
+
+			auto& entityOwnerComp = entity.emplace<EntityOwnerComponent>();
+			entityOwnerComp.Register(visualEntity);
+
 
 			std::string entityClassName = GetSession()->GetStringStore().GetString(entityData.entityClass);
 			if (std::shared_ptr<const EntityClass> entityClass = m_entityRegistry.FindClass(entityClassName))
@@ -288,8 +307,29 @@ namespace tsom
 			// Since we make use of parenting for environments, we need to make replication happen in global space
 			if (Nz::RigidBody3DComponent* rigidBody = entity.try_get<Nz::RigidBody3DComponent>())
 			{
-				if (rigidBody->GetReplicationMode() == Nz::PhysicsReplication3D::Local)
-					rigidBody->SetReplicationMode(Nz::PhysicsReplication3D::Global);
+				if (rigidBody->GetReplicationMode() != Nz::PhysicsReplication3D::None)
+				{
+					auto& referencedInterp = visualEntity.emplace<ReferencedPhysicsInterpolationComponent>();
+					referencedInterp.referenceEntity = entity;
+				}
+
+				switch (rigidBody->GetReplicationMode())
+				{
+					case Nz::PhysicsReplication3D::Local:
+						rigidBody->SetReplicationMode(Nz::PhysicsReplication3D::Global);
+						break;
+
+					case Nz::PhysicsReplication3D::LocalOnce:
+						rigidBody->SetReplicationMode(Nz::PhysicsReplication3D::GlobalOnce);
+						break;
+
+					case Nz::PhysicsReplication3D::Custom:
+					case Nz::PhysicsReplication3D::CustomOnce:
+					case Nz::PhysicsReplication3D::Global:
+					case Nz::PhysicsReplication3D::GlobalOnce:
+					case Nz::PhysicsReplication3D::None:
+						break;
+				}
 			}
 		}
 	}
@@ -321,14 +361,15 @@ namespace tsom
 			assert(m_entities[entityStates.entityId]);
 			EntityData& entityData = *m_entities[entityStates.entityId];
 
-			if (MovementInterpolationComponent* movementInterpolation = entityData.entity.try_get<MovementInterpolationComponent>())
+			if (NetworkInterpolationComponent* movementInterpolation = entityData.entity.try_get<NetworkInterpolationComponent>())
 				movementInterpolation->PushMovement(stateUpdate.tickIndex, entityStates.newStates.position, entityStates.newStates.rotation);
 			else if (Nz::RigidBody3DComponent* rigidBody = entityData.entity.try_get<Nz::RigidBody3DComponent>())
 			{
 				// physics is in global space
 				EnvironmentData& envData = *m_environments[entityData.environmentIndex];
-				Nz::Vector3f globalPos = envData.rootNode.ToGlobalPosition(entityStates.newStates.position);
-				Nz::Quaternionf globalRot = envData.rootNode.ToGlobalRotation(entityStates.newStates.rotation);
+				auto& rootNode = envData.rootEntity.get<Nz::NodeComponent>();
+				Nz::Vector3f globalPos = rootNode.ToGlobalPosition(entityStates.newStates.position);
+				Nz::Quaternionf globalRot = rootNode.ToGlobalRotation(entityStates.newStates.rotation);
 
 				rigidBody->TeleportTo(globalPos, globalRot);
 			}
@@ -358,14 +399,18 @@ namespace tsom
 		newEnvironment.entities.UnboundedSet(environmentUpdate.entity);
 
 		auto& entityNode = entityData.entity.get<Nz::NodeComponent>();
-		entityNode.SetParent(newEnvironment.rootNode, true);
+		entityNode.SetParent(newEnvironment.rootEntity, true);
 
 		auto& entityEnv = entityData.entity.get<EnvironmentComponent>();
 		entityEnv.environmentIndex = environmentUpdate.newEnvironmentId;
 
 		entityData.environmentIndex = environmentUpdate.newEnvironmentId;
-		if (MovementInterpolationComponent* movementInterpolation = entityData.entity.try_get<MovementInterpolationComponent>())
-			movementInterpolation->UpdateRoot(oldEnvironment.rootNode, newEnvironment.rootNode);
+		if (NetworkInterpolationComponent* movementInterpolation = entityData.entity.try_get<NetworkInterpolationComponent>())
+			movementInterpolation->UpdateRoot(oldEnvironment.rootEntity.get<Nz::NodeComponent>(), newEnvironment.rootEntity.get<Nz::NodeComponent>());
+
+		auto& entityVisualComp = entityData.entity.get<VisualEntityComponent>();
+		auto& visualNode = entityVisualComp.visualEntity.get<Nz::NodeComponent>();
+		visualNode.SetParent(newEnvironment.visualRootEntity, true);
 	}
 
 	void ClientSessionHandler::HandlePacket(Packets::EntityProcedureCall&& procedureCall)
@@ -398,7 +443,13 @@ namespace tsom
 
 		auto& environment = m_environments[envCreate.id].emplace();
 		environment.transform = envCreate.transform;
-		environment.rootNode.SetTransform(envCreate.transform.translation, envCreate.transform.rotation);
+
+		environment.rootEntity = m_world.CreateEntity();
+		environment.rootEntity.emplace<Nz::NodeComponent>(envCreate.transform.translation, envCreate.transform.rotation);
+
+		environment.visualRootEntity = m_world.CreateEntity();
+		environment.visualRootEntity.emplace<Nz::NodeComponent>(envCreate.transform.translation, envCreate.transform.rotation);
+		environment.visualRootEntity.emplace<CameraFollowerComponent>(envCreate.transform.translation, envCreate.transform.rotation);
 	}
 
 	void ClientSessionHandler::HandlePacket(Packets::EnvironmentDestroy&& envDestroy)
@@ -421,7 +472,12 @@ namespace tsom
 		assert(m_environments[envUpdate.id]);
 		auto& environmentData = *m_environments[envUpdate.id];
 		environmentData.transform = envUpdate.transform;
-		environmentData.rootNode.SetTransform(environmentData.transform.translation, environmentData.transform.rotation);
+
+		auto& rootNode = environmentData.rootEntity.get<Nz::NodeComponent>();
+		rootNode.SetTransform(environmentData.transform.translation, environmentData.transform.rotation);
+
+		auto& rootVisualNode = environmentData.visualRootEntity.get<CameraFollowerComponent>();
+		rootVisualNode.SetTransform(environmentData.transform.translation, environmentData.transform.rotation);
 
 		// Teleport physical entities
 		for (std::size_t entityIndex : environmentData.entities.IterBits())
@@ -515,7 +571,8 @@ namespace tsom
 				auto& env = *envOpt;
 				env.transform += inverseTransform;
 
-				env.rootNode.SetTransform(env.transform.translation, env.transform.rotation);
+				auto& rootNode = env.rootEntity.get<Nz::NodeComponent>();
+				rootNode.SetTransform(env.transform.translation, env.transform.rotation);
 
 				// Teleport physical entities
 				for (std::size_t entityIndex : env.entities.IterBits())
@@ -657,15 +714,19 @@ namespace tsom
 			}
 		}
 
-		auto& gfx = entity.emplace<Nz::GraphicsComponent>();
+		auto& visualEntityComp = entity.get<VisualEntityComponent>();
+
+		entt::handle& visualEntity = visualEntityComp.visualEntity;
+
+		auto& gfx = visualEntity.emplace<Nz::GraphicsComponent>();
 		gfx.AttachRenderable(m_playerModel->model, (entityData.controllingPlayerId == m_ownPlayerIndex) ? tsom::Constants::RenderMaskLocalPlayer : tsom::Constants::RenderMaskOtherPlayer);
 
 		// Skeleton & animations
 		std::shared_ptr<Nz::Skeleton> skeleton = std::make_shared<Nz::Skeleton>(m_playerAnimAssets->referenceSkeleton);
 
-		auto& skeletonComponent = entity.emplace<Nz::SkeletonComponent>(skeleton);
+		auto& skeletonComponent = visualEntity.emplace<Nz::SkeletonComponent>(skeleton);
 
-		entity.emplace<AnimationComponent>(skeleton, std::make_shared<PlayerAnimationController>(entity, m_playerAnimAssets));
+		visualEntity.emplace<AnimationComponent>(skeleton, std::make_shared<PlayerAnimationController>(visualEntity, m_playerAnimAssets));
 
 		// Floating name
 		std::shared_ptr<Nz::TextSprite> textSprite = std::make_shared<Nz::TextSprite>();
@@ -679,24 +740,23 @@ namespace tsom
 		entt::handle frontTextEntity = m_world.CreateEntity();
 		{
 			auto& textNode = frontTextEntity.emplace<Nz::NodeComponent>();
-			textNode.SetParent(entity);
+			textNode.SetParent(visualEntity);
 			textNode.SetPosition({ -textSprite->GetAABB().width * 0.5f, 1.5f, 0.f });
 
 			frontTextEntity.emplace<Nz::GraphicsComponent>(textSprite);
 		}
-		entity.get_or_emplace<EntityOwnerComponent>().Register(frontTextEntity);
+		visualEntity.get_or_emplace<EntityOwnerComponent>().Register(frontTextEntity);
 
 		entt::handle backTextEntity = m_world.CreateEntity();
 		{
 			auto& textNode = backTextEntity.emplace<Nz::NodeComponent>();
-			textNode.SetParent(entity);
+			textNode.SetParent(visualEntity);
 			textNode.SetPosition({ textSprite->GetAABB().width * 0.5f, 1.5f, 0.f });
 			textNode.SetRotation(Nz::EulerAnglesf(0.f, Nz::TurnAnglef(0.5f), 0.f));
 
 			backTextEntity.emplace<Nz::GraphicsComponent>(textSprite);
 		}
-
-		entity.get_or_emplace<EntityOwnerComponent>().Register(backTextEntity);
+		visualEntity.get_or_emplace<EntityOwnerComponent>().Register(backTextEntity);
 
 		if (entityData.controllingPlayerId == m_ownPlayerIndex)
 		{
@@ -704,7 +764,10 @@ namespace tsom
 			OnControlledEntityChanged(entity);
 		}
 		else
-			entity.emplace<MovementInterpolationComponent>(m_lastTickIndex);
+		{
+			entity.emplace<NetworkInterpolationComponent>(m_lastTickIndex);
+			visualEntity.emplace<TransformCopyComponent>().referenceEntity = entity;
+		}
 
 		if (playerInfo)
 			playerInfo->textSprite = std::move(textSprite);

@@ -4,8 +4,8 @@
 
 #pragma once
 
-#ifndef TSOM_CLIENTLIB_COMPONENTS_MOVEMENTINTERPOLATIONCOMPONENT_HPP
-#define TSOM_CLIENTLIB_COMPONENTS_MOVEMENTINTERPOLATIONCOMPONENT_HPP
+#ifndef TSOM_CLIENTLIB_COMPONENTS_NETWORKINTERPOLATIONCOMPONENT_HPP
+#define TSOM_CLIENTLIB_COMPONENTS_NETWORKINTERPOLATIONCOMPONENT_HPP
 
 #include <ClientLib/Export.hpp>
 #include <Nazara/Math/Quaternion.hpp>
@@ -19,13 +19,13 @@ namespace Nz
 
 namespace tsom
 {
-	class MovementInterpolationComponent
+	class NetworkInterpolationComponent
 	{
 		public:
-			inline MovementInterpolationComponent(Nz::UInt16 lastTickIndex);
-			MovementInterpolationComponent(const MovementInterpolationComponent&) = delete;
-			MovementInterpolationComponent(MovementInterpolationComponent&&) = default;
-			~MovementInterpolationComponent() = default;
+			inline NetworkInterpolationComponent(Nz::UInt16 lastTickIndex);
+			NetworkInterpolationComponent(const NetworkInterpolationComponent&) = delete;
+			NetworkInterpolationComponent(NetworkInterpolationComponent&&) = default;
+			~NetworkInterpolationComponent() = default;
 
 			inline bool Advance(float deltaIncrement, std::size_t targetMovementPoints, Nz::Vector3f* position, Nz::Quaternionf* rotation);
 
@@ -37,8 +37,8 @@ namespace tsom
 
 			inline void UpdateRoot(const Nz::Node& previousRoot, const Nz::Node& newRoot);
 
-			MovementInterpolationComponent& operator=(const MovementInterpolationComponent&) = delete;
-			MovementInterpolationComponent& operator=(MovementInterpolationComponent&&) = default;
+			NetworkInterpolationComponent& operator=(const NetworkInterpolationComponent&) = delete;
+			NetworkInterpolationComponent& operator=(NetworkInterpolationComponent&&) = default;
 
 			static constexpr std::size_t MaxPoint = 10;
 
@@ -57,6 +57,6 @@ namespace tsom
 	};
 }
 
-#include <ClientLib/Components/MovementInterpolationComponent.inl>
+#include <ClientLib/Components/NetworkInterpolationComponent.inl>
 
-#endif // TSOM_CLIENTLIB_COMPONENTS_MOVEMENTINTERPOLATIONCOMPONENT_HPP
+#endif // TSOM_CLIENTLIB_COMPONENTS_NETWORKINTERPOLATIONCOMPONENT_HPP

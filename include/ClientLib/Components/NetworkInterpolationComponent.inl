@@ -7,13 +7,13 @@
 
 namespace tsom
 {
-	inline MovementInterpolationComponent::MovementInterpolationComponent(Nz::UInt16 lastTickIndex) :
+	inline NetworkInterpolationComponent::NetworkInterpolationComponent(Nz::UInt16 lastTickIndex) :
 	m_lastTickIndex(lastTickIndex),
 	m_delta(0.f)
 	{
 	}
 
-	inline bool MovementInterpolationComponent::Advance(float deltaIncrement, std::size_t targetMovementPoints, Nz::Vector3f* position, Nz::Quaternionf* rotation)
+	inline bool NetworkInterpolationComponent::Advance(float deltaIncrement, std::size_t targetMovementPoints, Nz::Vector3f* position, Nz::Quaternionf* rotation)
 	{
 		deltaIncrement *= 1.f + (0.05f * (float(m_movementPoints.size()) - float(targetMovementPoints)));
 
@@ -35,7 +35,7 @@ namespace tsom
 		return true;
 	}
 
-	inline void MovementInterpolationComponent::Fill(std::size_t count, const Nz::Vector3f& position, const Nz::Quaternionf& rotation)
+	inline void NetworkInterpolationComponent::Fill(std::size_t count, const Nz::Vector3f& position, const Nz::Quaternionf& rotation)
 	{
 		assert(count < m_movementPoints.capacity());
 
@@ -46,12 +46,12 @@ namespace tsom
 		});
 	}
 
-	inline std::size_t MovementInterpolationComponent::GetMovementPointCount() const
+	inline std::size_t NetworkInterpolationComponent::GetMovementPointCount() const
 	{
 		return m_movementPoints.size();
 	}
 
-	inline void MovementInterpolationComponent::PushMovement(Nz::UInt16 tickIndex, const Nz::Vector3f& position, const Nz::Quaternionf& rotation)
+	inline void NetworkInterpolationComponent::PushMovement(Nz::UInt16 tickIndex, const Nz::Vector3f& position, const Nz::Quaternionf& rotation)
 	{
 		Nz::UInt16 tickDifference = tickIndex - m_lastTickIndex;
 		m_lastTickIndex = tickIndex;
@@ -79,7 +79,7 @@ namespace tsom
 		PushMovement(position, rotation);
 	}
 
-	inline void MovementInterpolationComponent::UpdateRoot(const Nz::Node& previousRoot, const Nz::Node& newRoot)
+	inline void NetworkInterpolationComponent::UpdateRoot(const Nz::Node& previousRoot, const Nz::Node& newRoot)
 	{
 		for (MovementData& movementData : m_movementPoints)
 		{
@@ -88,7 +88,7 @@ namespace tsom
 		}
 	}
 
-	inline void MovementInterpolationComponent::PushMovement(const Nz::Vector3f& position, const Nz::Quaternionf& rotation)
+	inline void NetworkInterpolationComponent::PushMovement(const Nz::Vector3f& position, const Nz::Quaternionf& rotation)
 	{
 		if (m_movementPoints.size() >= m_movementPoints.capacity())
 		{

@@ -4,16 +4,19 @@
 
 #include <ClientLib/ClientChunkEntities.hpp>
 #include <ClientLib/RenderConstants.hpp>
+#include <ClientLib/Components/VisualEntityComponent.hpp>
+#include <CommonLib/Components/EntityOwnerComponent.hpp>
 #include <Nazara/Core/ApplicationBase.hpp>
+#include <Nazara/Core/EnttWorld.hpp>
 #include <Nazara/Core/FilesystemAppComponent.hpp>
 #include <Nazara/Core/IndexBuffer.hpp>
 #include <Nazara/Core/TaskSchedulerAppComponent.hpp>
 #include <Nazara/Core/VertexBuffer.hpp>
+#include <Nazara/Core/Components/NodeComponent.hpp>
 #include <Nazara/Graphics/GraphicalMesh.hpp>
 #include <Nazara/Graphics/Graphics.hpp>
 #include <Nazara/Graphics/MaterialInstance.hpp>
 #include <Nazara/Graphics/Model.hpp>
-#include <Nazara/Graphics/PredefinedMaterials.hpp>
 #include <Nazara/Graphics/Components/GraphicsComponent.hpp>
 #include <Nazara/Graphics/PropertyHandler/OptionValuePropertyHandler.hpp>
 #include <Nazara/Graphics/PropertyHandler/TexturePropertyHandler.hpp>
@@ -198,7 +201,31 @@ namespace tsom
 			auto& rigidBody = chunkEntity.get<Nz::RigidBody3DComponent>();
 			rigidBody.SetGeom(std::move(colliderUpdateJob.collider), false);
 
-			auto& gfxComponent = chunkEntity.get_or_emplace<Nz::GraphicsComponent>();
+			entt::handle visualEntity;
+			if (VisualEntityComponent* visualEntityComponent = chunkEntity.try_get<VisualEntityComponent>())
+				visualEntity = visualEntityComponent->visualEntity;
+			else
+			{
+				// First time, create visual entity
+
+				// Get root visual entity
+				auto& visualRootEntity = m_parentEntity.get<VisualEntityComponent>();
+
+				visualEntity = m_world.CreateEntity();
+
+				auto& visualNode = visualEntity.emplace<Nz::NodeComponent>();
+				visualNode.CopyLocalTransform(chunkEntity.get<Nz::NodeComponent>());
+				visualNode.SetParent(visualRootEntity.visualEntity);
+
+				// Register our visual entity
+				auto& chunkVisualEntity = chunkEntity.emplace<VisualEntityComponent>();
+				chunkVisualEntity.visualEntity = visualEntity;
+
+				auto& entityOwnerComp = chunkEntity.get_or_emplace<EntityOwnerComponent>();
+				entityOwnerComp.Register(visualEntity);
+			}
+
+			auto& gfxComponent = visualEntity.get_or_emplace<Nz::GraphicsComponent>();
 			gfxComponent.Clear();
 
 			if (colliderUpdateJob.mesh)

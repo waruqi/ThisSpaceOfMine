@@ -4,4 +4,8 @@
 
 namespace tsom
 {
+	inline TransformCopySystem::TransformCopySystem(entt::registry& registry) :
+	m_registry(registry)
+	{
+	}
 }

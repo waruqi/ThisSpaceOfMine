@@ -99,7 +99,8 @@ namespace tsom
 			struct EnvironmentData
 			{
 				Nz::Bitset<Nz::UInt64> entities;
-				Nz::Node rootNode;
+				entt::handle rootEntity;
+				entt::handle visualRootEntity;
 				EnvironmentTransform transform;
 				GravityController* gravityController;
 			};

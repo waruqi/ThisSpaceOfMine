@@ -3,9 +3,9 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include <CommonLib/Scripting/SharedScriptingLibrary.hpp>
-#include <CommonLib/Scripting/ScriptingUtils.hpp>
 #include <CommonLib/CharacterController.hpp>
 #include <CommonLib/ShipController.hpp>
+#include <CommonLib/Scripting/ScriptingUtils.hpp>
 
 namespace tsom
 {

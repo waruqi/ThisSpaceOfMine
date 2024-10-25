@@ -10,7 +10,7 @@
 #include <ClientLib/Export.hpp>
 #include <Nazara/Core/Time.hpp>
 #include <NazaraUtils/TypeList.hpp>
-#include <entt/entt.hpp>
+#include <entt/fwd.hpp>
 
 namespace tsom
 {

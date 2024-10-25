@@ -5,8 +5,11 @@
 #include <Game/GameAppComponent.hpp>
 #include <ClientLib/RenderConstants.hpp>
 #include <ClientLib/Systems/AnimationSystem.hpp>
-#include <ClientLib/Systems/MovementInterpolationSystem.hpp>
+#include <ClientLib/Systems/CameraFollowerSystem.hpp>
+#include <ClientLib/Systems/NetworkMovementInterpolationSystem.hpp>
+#include <ClientLib/Systems/PhysicsInterpolationSystem.hpp>
 #include <ClientLib/Systems/PlayerAnimationSystem.hpp>
+#include <ClientLib/Systems/TransformCopySystem.hpp>
 #include <CommonLib/DownloadManager.hpp>
 #include <CommonLib/GameConstants.hpp>
 #include <CommonLib/InternalConstants.hpp>
@@ -261,16 +264,19 @@ namespace tsom
 
 		// World systems
 		world.AddSystem<AnimationSystem>();
-		world.AddSystem<MovementInterpolationSystem>(Constants::TickDuration);
+		world.AddSystem<CameraFollowerSystem>(500.f);
+		world.AddSystem<NetworkMovementInterpolationSystem>(Constants::TickDuration);
 		world.AddSystem<PlanetSystem>();
 		world.AddSystem<ShipSystem>();
+		world.AddSystem<TransformCopySystem>();
 		world.AddSystem<Nz::LifetimeSystem>();
 		world.AddSystem<Nz::RenderSystem>();
 
 		Nz::Physics3DSystem::Settings physSettings = Physics::BuildSettings();
 		physSettings.stepSize = Constants::TickDuration;
 
-		world.AddSystem<Nz::Physics3DSystem>(std::move(physSettings));
+		auto& physicsSystem = world.AddSystem<Nz::Physics3DSystem>(std::move(physSettings));
+		world.AddSystem<PhysicsInterpolationSystem>(physicsSystem);
 
 		return world;
 	}
