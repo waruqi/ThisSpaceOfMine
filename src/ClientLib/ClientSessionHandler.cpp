@@ -718,8 +718,10 @@ namespace tsom
 
 		entt::handle& visualEntity = visualEntityComp.visualEntity;
 
+		Nz::UInt32 playerRenderMask = (entityData.controllingPlayerId == m_ownPlayerIndex) ? tsom::Constants::RenderMaskLocalPlayer : tsom::Constants::RenderMaskOtherPlayer;
+
 		auto& gfx = visualEntity.emplace<Nz::GraphicsComponent>();
-		gfx.AttachRenderable(m_playerModel->model, (entityData.controllingPlayerId == m_ownPlayerIndex) ? tsom::Constants::RenderMaskLocalPlayer : tsom::Constants::RenderMaskOtherPlayer);
+		gfx.AttachRenderable(m_playerModel->model, playerRenderMask);
 
 		// Skeleton & animations
 		std::shared_ptr<Nz::Skeleton> skeleton = std::make_shared<Nz::Skeleton>(m_playerAnimAssets->referenceSkeleton);
@@ -743,7 +745,7 @@ namespace tsom
 			textNode.SetParent(visualEntity);
 			textNode.SetPosition({ -textSprite->GetAABB().width * 0.5f, 1.5f, 0.f });
 
-			frontTextEntity.emplace<Nz::GraphicsComponent>(textSprite);
+			frontTextEntity.emplace<Nz::GraphicsComponent>(textSprite, playerRenderMask);
 		}
 		visualEntity.get_or_emplace<EntityOwnerComponent>().Register(frontTextEntity);
 
@@ -754,7 +756,7 @@ namespace tsom
 			textNode.SetPosition({ textSprite->GetAABB().width * 0.5f, 1.5f, 0.f });
 			textNode.SetRotation(Nz::EulerAnglesf(0.f, Nz::TurnAnglef(0.5f), 0.f));
 
-			backTextEntity.emplace<Nz::GraphicsComponent>(textSprite);
+			backTextEntity.emplace<Nz::GraphicsComponent>(textSprite, playerRenderMask);
 		}
 		visualEntity.get_or_emplace<EntityOwnerComponent>().Register(backTextEntity);
 
