@@ -3,29 +3,14 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include <Game/States/MenuState.hpp>
-#include <CommonLib/GameConstants.hpp>
-#include <CommonLib/InternalConstants.hpp>
-#include <CommonLib/UpdaterAppComponent.hpp>
-#include <CommonLib/Version.hpp>
-#include <Game/GameConfigAppComponent.hpp>
-#include <Game/States/ConnectionState.hpp>
 #include <Game/States/GameState.hpp>
 #include <Game/States/PlayState.hpp>
-#include <Game/States/UpdateState.hpp>
 #include <Nazara/Widgets.hpp>
 #include <Nazara/Core/ApplicationBase.hpp>
 #include <Nazara/Core/FilesystemAppComponent.hpp>
 #include <Nazara/Core/StateMachine.hpp>
-#include <Nazara/Core/StringExt.hpp>
-#include <Nazara/Graphics/PredefinedMaterials.hpp>
 #include <Nazara/Graphics/TextureAsset.hpp>
-#include <Nazara/Network/Algorithm.hpp>
-#include <Nazara/Network/IpAddress.hpp>
-#include <Nazara/Network/Network.hpp>
 #include <Nazara/TextRenderer/SimpleTextDrawer.hpp>
-#include <fmt/color.h>
-#include <fmt/format.h>
-#include <nlohmann/json.hpp>
 #include <optional>
 
 namespace tsom
@@ -46,24 +31,23 @@ namespace tsom
 
 		m_title = CreateWidget<Nz::SimpleLabelWidget>();
 
+		auto& filesystem = GetStateData().app->GetComponent<Nz::FilesystemAppComponent>();
+		std::shared_ptr<Nz::Font> titleFont = filesystem.Open<Nz::Font>("assets/fonts/axaxax bd.otf");
+
 		m_title->UpdateDrawer([&](Nz::SimpleTextDrawer& textDrawer)
 		{
-			auto& filesystem = GetStateData().app->GetComponent<Nz::FilesystemAppComponent>();
-
 			textDrawer.SetTextOutlineColor(Nz::Color::White());
 			textDrawer.SetText("This Space Of Mine");
-			textDrawer.SetTextFont(filesystem.Open<Nz::Font>("assets/fonts/axaxax bd.otf"));
+			textDrawer.SetTextFont(titleFont);
 			textDrawer.SetTextStyle(Nz::TextStyle::OutlineOnly);
 		});
 
 		m_titleBackground = m_title->Add<Nz::SimpleLabelWidget>();
 		m_titleBackground->UpdateDrawer([&](Nz::SimpleTextDrawer& textDrawer)
 		{
-			auto& filesystem = GetStateData().app->GetComponent<Nz::FilesystemAppComponent>();
-
 			textDrawer.SetTextOutlineColor(Nz::Color(1.f, 1.f, 1.f, 0.3f));
 			textDrawer.SetText("This Space Of Mine");
-			textDrawer.SetTextFont(filesystem.Open<Nz::Font>("assets/fonts/axaxax bd.otf"));
+			textDrawer.SetTextFont(titleFont);
 			textDrawer.SetTextStyle(Nz::TextStyle::OutlineOnly);
 		});
 		m_titleBackground->SetPosition({ 7.f, -7.f });
