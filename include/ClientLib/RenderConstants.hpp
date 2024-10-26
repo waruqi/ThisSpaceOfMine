@@ -8,9 +8,12 @@
 #define TSOM_CLIENTLIB_RENDERCONSTANTS_HPP
 
 #include <NazaraUtils/Prerequisites.hpp>
+#include <Nazara/Math/Angle.hpp>
 
 namespace tsom::Constants
 {
+	constexpr Nz::DegreeAnglef DefaultCameraFOV = 90.f;
+
 	constexpr Nz::UInt32 RenderMask2D = 0xFFFF0000;
 	constexpr Nz::UInt32 RenderMaskUI = 0x00010000;
 	constexpr Nz::UInt32 RenderMask3D = 0x0000FFFF;

@@ -465,7 +465,7 @@ namespace tsom
 					{ Chatbox::ColorItem{ Nz::Color::White() } },
 					{ Chatbox::TextItem{ message } }
 				}
-				});
+			});
 
 			fmt::print("{0}: {1}\n", playerInfo.nickname, message);
 		});
@@ -724,9 +724,7 @@ namespace tsom
 					Nz::DegreeAnglef cameraFov = cameraComponent.GetFOV();
 					if (!cameraFov.ApproxEqual(m_targetCameraFOV))
 					{
-						float C = (m_targetCameraFOV < cameraFov) ? 250.f : 400.f;
-						float factor = std::exp(-elapsedTime.AsSeconds() * C);
-
+						float factor = (m_targetCameraFOV == Constants::DefaultCameraFOV) ? 2.f * updateTime : 0.5f * updateTime;
 						cameraComponent.UpdateFOV(Nz::Lerp(cameraFov, m_targetCameraFOV, factor));
 					}
 					break;
@@ -917,9 +915,7 @@ namespace tsom
 
 		if (m_isPilotingShip)
 		{
-			float C = 300.f;
-			float factor = std::exp(-elapsedTime.AsSeconds() * C);
-
+			float factor = 2.f * updateTime;
 			m_currentShipRotation = Nz::Quaternionf::Slerp(m_currentShipRotation, m_targetShipRotation, factor);
 		}
 
@@ -1014,7 +1010,11 @@ namespace tsom
 				shipInputs.yaw = m_incomingCameraRotation.yaw;
 
 				// TODO: Use ship acceleration instead
-				m_targetCameraFOV = Nz::DegreeAnglef((shipInputs.moveForward) ? 110.f : 90.f);
+				m_targetCameraFOV = Constants::DefaultCameraFOV;
+				if (shipInputs.moveForward)
+					m_targetCameraFOV = Nz::DegreeAnglef(110.f);
+				else if (shipInputs.moveBackward)
+					m_targetCameraFOV = Nz::DegreeAnglef(80.f);
 
 				float roll = 0.f;
 				if (shipInputs.rollLeft)
