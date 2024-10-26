@@ -577,61 +577,64 @@ namespace tsom
 
 			auto& stateData = GetStateData();
 
-			if (auto raycastHit = RaycastQuery())
+			if (!m_isPilotingShip)
 			{
-				if (auto* chunkComponent = raycastHit->hitEntity.try_get<ChunkComponent>())
+				if (auto raycastHit = RaycastQuery())
 				{
-					auto& chunkNetworkMap = chunkComponent->parentEntity.get<ChunkNetworkMapComponent>();
-					auto& chunkNode = raycastHit->hitEntity.get<Nz::NodeComponent>();
-
-					const Chunk& hitChunk = *chunkComponent->chunk;
-					const ChunkContainer& chunkContainer = hitChunk.GetContainer();
-
-					if (event.button == Nz::Mouse::Left)
+					if (auto* chunkComponent = raycastHit->hitEntity.try_get<ChunkComponent>())
 					{
-						// Mine
-						Nz::Vector3f blockPos = raycastHit->hitPos - raycastHit->hitNormal * chunkContainer.GetTileSize() * 0.25f;
-						auto coordinates = hitChunk.ComputeCoordinates(chunkNode.ToLocalPosition(blockPos));
-						if (!coordinates)
-							return;
+						auto& chunkNetworkMap = chunkComponent->parentEntity.get<ChunkNetworkMapComponent>();
+						auto& chunkNode = raycastHit->hitEntity.get<Nz::NodeComponent>();
 
-						Packets::MineBlock mineBlock;
-						mineBlock.chunkId = Nz::Retrieve(chunkNetworkMap.chunkNetworkIndices, &hitChunk);
-						mineBlock.voxelLoc.x = coordinates->x;
-						mineBlock.voxelLoc.y = coordinates->y;
-						mineBlock.voxelLoc.z = coordinates->z;
+						const Chunk& hitChunk = *chunkComponent->chunk;
+						const ChunkContainer& chunkContainer = hitChunk.GetContainer();
 
-						stateData.networkSession->SendPacket(mineBlock);
-					}
-					else
-					{
-						const Nz::Node* environmentNode = chunkNode.GetParent();
-						if NAZARA_UNLIKELY(!environmentNode)
+						if (event.button == Nz::Mouse::Left)
 						{
-							fmt::print(fg(fmt::color::red), "chunk has no environment node\n");
-							return;
+							// Mine
+							Nz::Vector3f blockPos = raycastHit->hitPos - raycastHit->hitNormal * chunkContainer.GetTileSize() * 0.25f;
+							auto coordinates = hitChunk.ComputeCoordinates(chunkNode.ToLocalPosition(blockPos));
+							if (!coordinates)
+								return;
+
+							Packets::MineBlock mineBlock;
+							mineBlock.chunkId = Nz::Retrieve(chunkNetworkMap.chunkNetworkIndices, &hitChunk);
+							mineBlock.voxelLoc.x = coordinates->x;
+							mineBlock.voxelLoc.y = coordinates->y;
+							mineBlock.voxelLoc.z = coordinates->z;
+
+							stateData.networkSession->SendPacket(mineBlock);
 						}
+						else
+						{
+							const Nz::Node* environmentNode = chunkNode.GetParent();
+							if NAZARA_UNLIKELY(!environmentNode)
+							{
+								fmt::print(fg(fmt::color::red), "chunk has no environment node\n");
+								return;
+							}
 
-						// Place
-						// Don't use hit chunk as it wouldn't work for borders blocks
-						Nz::Vector3f blockPos = environmentNode->ToLocalPosition(raycastHit->hitPos + raycastHit->hitNormal * chunkContainer.GetTileSize() * 0.25f);
-						ChunkIndices chunkIndices = chunkContainer.GetChunkIndicesByPosition(blockPos);
-						const Chunk* chunk = chunkContainer.GetChunk(chunkIndices);
-						if (!chunk)
-							return;
+							// Place
+							// Don't use hit chunk as it wouldn't work for borders blocks
+							Nz::Vector3f blockPos = environmentNode->ToLocalPosition(raycastHit->hitPos + raycastHit->hitNormal * chunkContainer.GetTileSize() * 0.25f);
+							ChunkIndices chunkIndices = chunkContainer.GetChunkIndicesByPosition(blockPos);
+							const Chunk* chunk = chunkContainer.GetChunk(chunkIndices);
+							if (!chunk)
+								return;
 
-						auto coordinates = chunk->ComputeCoordinates(blockPos - chunkContainer.GetChunkOffset(chunkIndices));
-						if (!coordinates)
-							return;
+							auto coordinates = chunk->ComputeCoordinates(blockPos - chunkContainer.GetChunkOffset(chunkIndices));
+							if (!coordinates)
+								return;
 
-						Packets::PlaceBlock placeBlock;
-						placeBlock.chunkId = Nz::Retrieve(chunkNetworkMap.chunkNetworkIndices, chunk);
-						placeBlock.voxelLoc.x = coordinates->x;
-						placeBlock.voxelLoc.y = coordinates->y;
-						placeBlock.voxelLoc.z = coordinates->z;
-						placeBlock.newContent = Nz::SafeCast<Nz::UInt8>(m_blockSelectionBar->GetSelectedBlock());
+							Packets::PlaceBlock placeBlock;
+							placeBlock.chunkId = Nz::Retrieve(chunkNetworkMap.chunkNetworkIndices, chunk);
+							placeBlock.voxelLoc.x = coordinates->x;
+							placeBlock.voxelLoc.y = coordinates->y;
+							placeBlock.voxelLoc.z = coordinates->z;
+							placeBlock.newContent = Nz::SafeCast<Nz::UInt8>(m_blockSelectionBar->GetSelectedBlock());
 
-						stateData.networkSession->SendPacket(placeBlock);
+							stateData.networkSession->SendPacket(placeBlock);
+						}
 					}
 				}
 			}
@@ -918,7 +921,6 @@ namespace tsom
 			float factor = 2.f * updateTime;
 			m_currentShipRotation = Nz::Quaternionf::Slerp(m_currentShipRotation, m_targetShipRotation, factor);
 		}
-
 
 		GetStateData().world->GetSystem<CameraFollowerSystem>().SetCameraPosition(m_cameraEntity.get<Nz::NodeComponent>().GetGlobalPosition());
 
