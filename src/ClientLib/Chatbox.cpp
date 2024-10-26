@@ -21,17 +21,18 @@ namespace tsom
 		//Nz::FontRef chatboxFont = Nz::FontLibrary::Get("BW_Chatbox");
 		//assert(chatboxFont);
 
+		m_chatboxBackground = Add<Nz::BaseWidget>();
+		m_chatboxBackground->SetBackgroundColor(Nz::Color(0.f, 0.f, 0.f, 0.5f));
+
 		m_chatboxHistory = Add<Nz::RichTextAreaWidget>();
-		m_chatboxHistory->EnableBackground(false);
 		m_chatboxHistory->EnableLineWrap(true);
-		m_chatboxHistory->SetBackgroundColor(Nz::Color(0.f, 0.f, 0.f, 0.5f));
 		m_chatboxHistory->SetCharacterSize(22);
 		m_chatboxHistory->SetTextColor(Nz::Color::White());
 		m_chatboxHistory->SetTextOutlineColor(Nz::Color::Black());
 		m_chatboxHistory->SetTextOutlineThickness(1.f);
 		m_chatboxHistory->SetReadOnly(true);
 
-		m_chatboxScrollArea = Add<Nz::ScrollAreaWidget>(m_chatboxHistory);
+		m_chatboxScrollArea = m_chatboxBackground->Add<Nz::ScrollAreaWidget>(m_chatboxHistory);
 		m_chatboxScrollArea->Resize({ 480.f, 0.f });
 		m_chatboxScrollArea->EnableScrollbar(false);
 
@@ -42,11 +43,13 @@ namespace tsom
 		//m_chatEnteringBox->SetTextFont(chatboxFont);
 		m_chatEnteringBox->Hide();
 		m_chatEnteringBox->SetMaximumTextLength(Constants::ChatMaxPlayerMessageLength);
+
+		Refresh();
 	}
 
 	void Chatbox::Clear()
 	{
-		m_chatLines.clear();
+		m_chatEntries.clear();
 		m_chatboxHistory->Clear();
 	}
 
@@ -66,26 +69,36 @@ namespace tsom
 		{
 			if (shouldOpen)
 			{
-				m_chatboxHistory->EnableBackground(true);
+				m_chatboxBackground->EnableBackground(true);
 				m_chatboxScrollArea->EnableScrollbar(true);
 				m_chatEnteringBox->Show();
 				m_chatEnteringBox->SetFocus();
 			}
 			else
 			{
-				m_chatboxHistory->EnableBackground(false);
+				m_chatboxBackground->EnableBackground(false);
 				m_chatboxScrollArea->EnableScrollbar(false);
 				m_chatEnteringBox->Clear();
 				m_chatEnteringBox->Hide();
 			}
+
+			Refresh();
 		}
 	}
 
-	void Chatbox::PrintMessage(std::vector<Item> message)
+	void Chatbox::PrintMessage(std::vector<Item> items)
 	{
-		m_chatLines.emplace_back(std::move(message));
-		if (m_chatLines.size() > Constants::ChatMaxLines)
-			m_chatLines.erase(m_chatLines.begin());
+		return PrintMessage(items, Constants::ChatPlayerMessageDisplayTime);
+	}
+
+	void Chatbox::PrintMessage(std::vector<Item> items, Nz::Time disappearTime)
+	{
+		if (m_chatEntries.size() >= Constants::ChatMaxLines)
+			m_chatEntries.erase(m_chatEntries.begin());
+
+		auto& chatEntry = m_chatEntries.emplace_back();
+		chatEntry.disappearTime = Nz::Timestamp::Now() + disappearTime;
+		chatEntry.items = std::move(items);
 
 		Refresh();
 	}
@@ -102,6 +115,13 @@ namespace tsom
 		m_chatEnteringBox->SetFocus();
 	}
 
+	void Chatbox::Update()
+	{
+		Nz::Timestamp now = Nz::Timestamp::Now();
+		if (now > m_nextDisappearTime)
+			Refresh();
+	}
+
 	void Chatbox::Layout()
 	{
 		BaseWidget::Layout();
@@ -110,16 +130,28 @@ namespace tsom
 
 		m_chatEnteringBox->Resize({ size.x, m_chatEnteringBox->GetPreferredHeight() });
 		m_chatEnteringBox->SetPosition({ 0.f, 0.f, 0.f });
-		m_chatboxScrollArea->Resize({ size.x / 3.f, size.y / 3.f });
-		m_chatboxScrollArea->SetPosition({ 5.f, m_chatEnteringBox->GetPosition().y + m_chatEnteringBox->GetHeight() + 5.f, 0.f });
+		m_chatboxBackground->Resize({ size.x / 3.f, size.y / 3.f });
+		m_chatboxBackground->SetPosition({ 5.f, m_chatEnteringBox->GetPosition().y + m_chatEnteringBox->GetHeight() + 5.f, 0.f });
 	}
 
 	void Chatbox::Refresh()
 	{
+		Nz::Timestamp now = Nz::Timestamp::Now();
+
+		m_nextDisappearTime = Nz::Timestamp::FromNanoseconds(Nz::MaxValue<Nz::Int64>()); //< max timestamp
+
 		m_chatboxHistory->Clear();
-		for (const auto& lineItems : m_chatLines)
+		for (const auto& entry : m_chatEntries)
 		{
-			for (const Item& lineItem : lineItems)
+			if (now > entry.disappearTime)
+			{
+				if (!IsOpen())
+					continue;
+			}
+			else
+				m_nextDisappearTime = std::min(m_nextDisappearTime, entry.disappearTime);
+
+			for (const Item& lineItem : entry.items)
 			{
 				std::visit([&](auto&& item)
 				{
@@ -145,8 +177,7 @@ namespace tsom
 		}
 
 		m_chatboxHistory->Resize({ m_chatboxHistory->GetWidth(), m_chatboxHistory->GetPreferredHeight() });
-		m_chatboxScrollArea->Resize(m_chatboxScrollArea->GetSize()); // force layout update
-		m_chatboxScrollArea->SetPosition({ 5.f, m_chatEnteringBox->GetPosition().y + m_chatEnteringBox->GetHeight() + 5.f, 0.f});
+		m_chatboxScrollArea->Resize({ m_chatboxBackground->GetWidth(), std::min(m_chatboxBackground->GetHeight(), m_chatboxHistory->GetHeight()) });
 
 		m_chatboxScrollArea->ScrollToRatio(1.f);
 	}

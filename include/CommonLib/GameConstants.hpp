@@ -7,6 +7,7 @@
 #ifndef TSOM_COMMONLIB_GAMECONSTANTS_HPP
 #define TSOM_COMMONLIB_GAMECONSTANTS_HPP
 
+#include <Nazara/Core/Time.hpp>
 #include <Nazara/Math/Angle.hpp>
 #include <Nazara/Math/Quaternion.hpp>
 #include <Nazara/Math/Vector3.hpp>
@@ -18,6 +19,7 @@ namespace tsom::Constants
 	constexpr std::size_t ChatMaxLines = 100;
 	constexpr std::size_t ChatMaxMessageLength = 1024;
 	constexpr std::size_t ChatMaxPlayerMessageLength = 256;
+	constexpr Nz::Time ChatPlayerMessageDisplayTime = Nz::Time::Seconds(60);
 
 	// Player constants
 	constexpr std::size_t PlayerMaxNicknameLength = 16;

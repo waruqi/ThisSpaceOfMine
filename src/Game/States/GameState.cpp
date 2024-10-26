@@ -662,6 +662,7 @@ namespace tsom
 			return true;
 
 		m_timerManager.Update(elapsedTime);
+		m_chatBox->Update();
 
 		if (m_debugOverlay)
 			m_debugOverlay->textDrawer.Clear();

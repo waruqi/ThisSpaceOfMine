@@ -8,6 +8,7 @@
 #define TSOM_CLIENTLIB_CHATBOX_HPP
 
 #include <ClientLib/Export.hpp>
+#include <Nazara/Core/Timestamp.hpp>
 #include <Nazara/Widgets/BaseWidget.hpp>
 #include <variant>
 
@@ -48,10 +49,13 @@ namespace tsom
 
 			void Open(bool shouldOpen = true);
 
-			void PrintMessage(std::vector<Item> message);
+			void PrintMessage(std::vector<Item> items);
+			void PrintMessage(std::vector<Item> items, Nz::Time disappearTime);
 
 			void SendMessage();
 			void SetFocus();
+
+			void Update();
 
 			Chatbox& operator=(const Chatbox&) = delete;
 			Chatbox& operator=(Chatbox&&) = delete;
@@ -62,10 +66,18 @@ namespace tsom
 			void Layout() override;
 			void Refresh();
 
-			std::vector<std::vector<Item>> m_chatLines;
+			struct Entry
+			{
+				std::vector<Item> items;
+				Nz::Timestamp disappearTime;
+			};
+
+			std::vector<Entry> m_chatEntries;
+			Nz::BaseWidget* m_chatboxBackground;
 			Nz::RichTextAreaWidget* m_chatboxHistory;
 			Nz::ScrollAreaWidget* m_chatboxScrollArea;
 			Nz::TextAreaWidget* m_chatEnteringBox;
+			Nz::Timestamp m_nextDisappearTime;
 	};
 }
 
