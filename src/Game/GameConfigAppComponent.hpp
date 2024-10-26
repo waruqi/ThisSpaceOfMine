@@ -9,7 +9,7 @@
 
 #include <CommonLib/ConfigFile.hpp>
 #include <Nazara/Core/ApplicationComponent.hpp>
-#include <NazaraUtils/Prerequisites.hpp>
+#include <filesystem>
 
 namespace tsom
 {
@@ -17,6 +17,10 @@ namespace tsom
 	{
 		public:
 			GameConfigFile();
+
+			static constexpr std::string_view FileName = "gameconfig.lua";
+
+			static std::filesystem::path GetPath();
 	};
 
 	class GameConfigAppComponent final : public Nz::ApplicationComponent

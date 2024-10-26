@@ -119,6 +119,10 @@ namespace tsom
 			return FailAuth(AuthError::ServerIsOutdated);
 		}
 
+		// Make a special dev version
+		if (IsDevVersion())
+			authRequest.gameVersion = Nz::MaxValue();
+
 		NetworkSession* session = GetSession();
 		session->SetProtocolVersion(authRequest.gameVersion);
 
