@@ -199,7 +199,7 @@ namespace tsom
 			entt::handle chunkEntity = Nz::Retrieve(m_chunkEntities, chunkIndices);
 
 			auto& rigidBody = chunkEntity.get<Nz::RigidBody3DComponent>();
-			rigidBody.SetGeom(std::move(colliderUpdateJob.collider), false);
+			rigidBody.SetCollider(std::move(colliderUpdateJob.collider), false);
 
 			entt::handle visualEntity;
 			if (VisualEntityComponent* visualEntityComponent = chunkEntity.try_get<VisualEntityComponent>())
@@ -296,8 +296,8 @@ namespace tsom
 			entt::handle chunkEntity = Nz::Retrieve(m_chunkEntities, chunkIndices);
 
 			auto& rigidBodyComponent = chunkEntity.get<Nz::RigidBody3DComponent>();
-			const std::shared_ptr<Nz::Collider3D>& geom = rigidBodyComponent.GetGeom();
-			if (!geom)
+			const std::shared_ptr<Nz::Collider3D>& collider = rigidBodyComponent.GetCollider();
+			if (!collider)
 				return;
 
 			std::shared_ptr<Nz::MaterialInstance> colliderMat = Nz::MaterialInstance::Instantiate(Nz::MaterialType::Basic);
@@ -308,7 +308,7 @@ namespace tsom
 				return true;
 			});
 
-			std::shared_ptr<Nz::Mesh> colliderMesh = Nz::Mesh::Build(geom->GenerateDebugMesh());
+			std::shared_ptr<Nz::Mesh> colliderMesh = Nz::Mesh::Build(collider->GenerateDebugMesh());
 			std::shared_ptr<Nz::GraphicalMesh> colliderGraphicalMesh = Nz::GraphicalMesh::BuildFromMesh(*colliderMesh);
 
 			colliderModel = std::make_shared<Nz::Model>(colliderGraphicalMesh);

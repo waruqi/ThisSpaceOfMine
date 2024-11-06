@@ -364,9 +364,9 @@ namespace tsom
 
 					auto primitive = Nz::Primitive::IcoSphere(1.f, 2);
 
-					auto geom = Nz::Collider3D::Build(primitive);
+					auto collider = Nz::Collider3D::Build(primitive);
 
-					Nz::RigidBody3D::DynamicSettings dynSettings(geom, 10.f);
+					Nz::RigidBody3D::DynamicSettings dynSettings(collider, 10.f);
 					dynSettings.allowSleeping = false;
 
 					entt::handle debugEntity = stateData.world->CreateEntity();

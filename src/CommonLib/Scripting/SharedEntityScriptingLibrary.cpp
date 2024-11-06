@@ -55,7 +55,7 @@ namespace tsom
 
 						auto HandleCommonParameters = [](Nz::RigidBody3DComponent::CommonSettings& commonSettings, sol::table& parameters)
 						{
-							commonSettings.geom = parameters.get<std::shared_ptr<Nz::Collider3D>>("geom");
+							commonSettings.collider = parameters.get<std::shared_ptr<Nz::Collider3D>>("collider");
 							commonSettings.initiallySleeping = parameters.get_or("initiallySleeping", commonSettings.initiallySleeping);
 							commonSettings.isSimulationEnabled = parameters.get_or("isSimulationEnabled", commonSettings.isSimulationEnabled);
 							commonSettings.isTrigger = parameters.get_or("isTrigger", commonSettings.isTrigger);
@@ -255,7 +255,7 @@ namespace tsom
 			"GetAABB", LuaFunction(&Nz::RigidBody3DComponent::GetAABB),
 			"GetAngularDamping", LuaFunction(&Nz::RigidBody3DComponent::GetAngularDamping),
 			"GetAngularVelocity", LuaFunction(&Nz::RigidBody3DComponent::GetAngularVelocity),
-			"GetGeom", LuaFunction(&Nz::RigidBody3DComponent::GetGeom),
+			"GetCollider", LuaFunction(&Nz::RigidBody3DComponent::GetCollider),
 			"GetLinearDamping", LuaFunction(&Nz::RigidBody3DComponent::GetLinearDamping),
 			"GetLinearVelocity", LuaFunction(&Nz::RigidBody3DComponent::GetLinearVelocity),
 			"GetMass", LuaFunction(&Nz::RigidBody3DComponent::GetMass),
@@ -263,7 +263,7 @@ namespace tsom
 			"GetRotation", LuaFunction(&Nz::RigidBody3DComponent::GetRotation),
 			"SetAngularDamping", LuaFunction(&Nz::RigidBody3DComponent::SetAngularDamping),
 			"SetAngularVelocity", LuaFunction(&Nz::RigidBody3DComponent::SetAngularVelocity),
-			"SetGeom", LuaFunction(&Nz::RigidBody3DComponent::SetGeom),
+			"SetCollider", LuaFunction(&Nz::RigidBody3DComponent::SetCollider),
 			"SetLinearDamping", LuaFunction(&Nz::RigidBody3DComponent::SetLinearDamping),
 			"SetLinearVelocity", LuaFunction(&Nz::RigidBody3DComponent::SetLinearVelocity),
 			"SetMass", LuaFunction(&Nz::RigidBody3DComponent::SetMass),

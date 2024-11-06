@@ -185,7 +185,7 @@ namespace tsom
 
 			entt::handle chunkEntity = Nz::Retrieve(m_chunkEntities, chunkIndices);
 			auto& rigidBody = chunkEntity.get<Nz::RigidBody3DComponent>();
-			rigidBody.SetGeom(std::move(colliderUpdateJob.collider), false);
+			rigidBody.SetCollider(std::move(colliderUpdateJob.collider), false);
 		};
 
 		auto& taskScheduler = m_application.GetComponent<Nz::TaskSchedulerAppComponent>();

@@ -504,7 +504,7 @@ namespace tsom
 		});
 
 		auto& rigidBody = m_proxyEntity.get<Nz::RigidBody3DComponent>();
-		rigidBody.SetGeom(std::move(hullCollider));
+		rigidBody.SetCollider(std::move(hullCollider));
 		rigidBody.SetMass(fullBlockCount);
 	}
 

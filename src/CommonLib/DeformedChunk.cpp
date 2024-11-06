@@ -32,7 +32,13 @@ namespace tsom
 		if (indices.empty())
 			return nullptr;
 
-		return std::make_shared<Nz::MeshCollider3D>(&positions[0], positions.size(), indices.data(), indices.size());
+		Nz::MeshCollider3D::Settings meshSettings;
+		meshSettings.indexCount = indices.size();
+		meshSettings.indices = indices.data();
+		meshSettings.vertexCount = positions.size();
+		meshSettings.vertices = &positions[0];
+
+		return std::make_shared<Nz::MeshCollider3D>(meshSettings);
 	}
 
 	std::optional<Nz::Vector3ui> DeformedChunk::ComputeCoordinates(const Nz::Vector3f& position) const
