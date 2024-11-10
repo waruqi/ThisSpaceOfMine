@@ -222,7 +222,7 @@ namespace tsom
 
 	void ServerShipEnvironment::OnSave()
 	{
-		if (!m_playerUuid || !m_shouldSave)
+		if (!m_playerUuid || !*m_shouldSave)
 			return;
 
 		nlohmann::json chunks;
