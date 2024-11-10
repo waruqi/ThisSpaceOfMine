@@ -397,6 +397,9 @@ namespace tsom
 				Nz::UInt32 entityId = Nz::Retrieve(m_entityIndices, handle);
 				deletePacket.entities.push_back(entityId);
 
+				auto& entityEnv = m_visibleEnvironments[m_visibleEntities[entityId].envIndex];
+				entityEnv.entities.Reset(entityId);
+
 				m_freeEntityIds.Set(entityId, true);
 				m_visibleEntities[entityId].entity = entt::handle{};
 				m_visibleEntities[entityId].envIndex = Nz::MaxValue();
