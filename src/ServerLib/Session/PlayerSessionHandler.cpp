@@ -369,9 +369,20 @@ namespace tsom
 					if (!hitCoordinates)
 						return;
 
-					auto corners = hitChunk.ComputeVoxelCorners(hitCoordinates->blockIndices);
+					BlockIndices blockIndices = chunkContainer.GetBlockIndices(hitChunk.GetIndices(), hitCoordinates->blockIndices);
+
+					const DirectionAxis& dirAxis = s_dirAxis[hitCoordinates->direction];
+					blockIndices[dirAxis.upAxis] += dirAxis.upDir;
+
+					Nz::Vector3ui innerCoordinates;
+					ChunkIndices chunkIndices = chunkContainer.GetChunkIndicesByBlockIndices(blockIndices, &innerCoordinates);
+					const Chunk* chunk = chunkContainer.GetChunk(chunkIndices);
+					if (!chunk)
+						return;
+
+					auto corners = chunk->ComputeVoxelCorners(innerCoordinates);
 					Nz::Vector3f blockCenter = std::accumulate(corners.begin(), corners.end(), Nz::Vector3f::Zero()) / corners.size();
-					Nz::Vector3f offset = hitChunk.GetContainer().GetChunkOffset(hitChunk.GetIndices());
+					Nz::Vector3f offset = chunk->GetContainer().GetChunkOffset(chunk->GetIndices());
 
 					Direction dir = DirectionFromNormal(playerNode.GetForward());
 
