@@ -30,7 +30,7 @@ int ServerMain(int argc, char* argv[])
 	app.AddComponent<Nz::WebServiceAppComponent>();
 	app.AddComponent<tsom::PlayerTokenAppComponent>();
 	auto& configAppComponent = app.AddComponent<tsom::ServerConfigAppComponent>();
-	auto& worldAppComponent = app.AddComponent<tsom::ServerInstanceAppComponent>();
+	auto& serverInstanceAppComponent = app.AddComponent<tsom::ServerInstanceAppComponent>();
 
 	std::filesystem::path scriptPath = Nz::Utf8Path("scripts");
 	if (!std::filesystem::is_directory(scriptPath))
@@ -55,7 +55,7 @@ int ServerMain(int argc, char* argv[])
 	instanceConfig.saveInterval = Nz::Time::Seconds(config.GetIntegerValue<long long>("Save.Interval"));
 	instanceConfig.connectionTokenEncryptionKey = config.GetConnectionTokenEncryptionKey();
 
-	auto& instance = worldAppComponent.AddInstance(instanceConfig);
+	auto& instance = serverInstanceAppComponent.AddInstance(instanceConfig);
 	auto& sessionManager = instance.AddSessionManager(serverPort);
 	sessionManager.SetDefaultHandler<tsom::InitialSessionHandler>(std::ref(instance));
 
