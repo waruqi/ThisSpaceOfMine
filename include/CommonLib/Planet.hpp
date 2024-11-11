@@ -14,6 +14,7 @@
 #include <NazaraUtils/FunctionRef.hpp>
 #include <tsl/hopscotch_map.h>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 namespace Nz
@@ -68,6 +69,7 @@ namespace tsom
 				NazaraSlot(Chunk, OnReset, onReset);
 			};
 
+			std::mutex m_chunkUpdatedSignalMutex;
 			tsl::hopscotch_map<ChunkIndices, ChunkData> m_chunks;
 			float m_cornerRadius;
 			float m_gravity;

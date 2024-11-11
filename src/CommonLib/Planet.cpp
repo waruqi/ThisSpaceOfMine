@@ -48,6 +48,8 @@ namespace tsom
 
 		chunkData.onReset.Connect(chunkData.chunk->OnReset, [this](Chunk* chunk)
 		{
+			// FIXME: Nz::Signal operator() is not thread-safe!
+			std::lock_guard lock(m_chunkUpdatedSignalMutex);
 			OnChunkUpdated(this, chunk, DirectionMask_All);
 		});
 
@@ -69,6 +71,8 @@ namespace tsom
 			else if (indices.z == chunk->GetSize().z - 1)
 				neighborMask |= Direction::Up;
 
+			// FIXME: Nz::Signal operator() is not thread-safe!
+			std::lock_guard lock(m_chunkUpdatedSignalMutex);
 			OnChunkUpdated(this, chunk, neighborMask);
 		});
 
