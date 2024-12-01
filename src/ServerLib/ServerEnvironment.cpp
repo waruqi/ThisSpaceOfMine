@@ -93,11 +93,4 @@ namespace tsom
 		NazaraAssert(m_registeredPlayers.UnboundedTest(player->GetPlayerIndex()), "player is not registered");
 		m_registeredPlayers.Reset(player->GetPlayerIndex());
 	}
-
-	void ServerEnvironment::UpdateConnectedTransform(ServerEnvironment& environment, const EnvironmentTransform& transform)
-	{
-		auto it = m_connectedEnvironments.find(&environment);
-		NazaraAssert(it != m_connectedEnvironments.end(), "unknown environment");
-		it.value() = transform;
-	}
 }

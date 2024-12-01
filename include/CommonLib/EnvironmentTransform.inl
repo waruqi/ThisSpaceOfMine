@@ -10,6 +10,11 @@ namespace tsom
 	{
 	}
 
+	inline bool EnvironmentTransform::ApproxEqual(const EnvironmentTransform& other, float translationEpsilon, float rotationEpsilon) const
+	{
+		return translation.ApproxEqual(other.translation, translationEpsilon) && rotation.ApproxEqual(other.rotation, rotationEpsilon);
+	}
+
 	inline Nz::Quaternionf EnvironmentTransform::Rotate(const Nz::Quaternionf& localRotation) const
 	{
 		return Nz::Quaternionf::Normalize(rotation * localRotation);

@@ -38,10 +38,10 @@ namespace tsom
 			ServerEnvironment(ServerEnvironment&&) = delete;
 			virtual ~ServerEnvironment();
 
+			inline bool CompareAndUpdateConnectedTransform(ServerEnvironment& environment, const EnvironmentTransform& transform);
 			void Connect(ServerEnvironment& environment, const EnvironmentTransform& transform);
-			void Disconnect(ServerEnvironment& environment);
-
 			virtual entt::handle CreateEntity() = 0;
+			void Disconnect(ServerEnvironment& environment);
 
 			template<typename F> void ForEachConnectedEnvironment(F&& callback) const;
 			template<typename F> void ForEachPlayer(F&& callback);
@@ -59,7 +59,7 @@ namespace tsom
 			void RegisterPlayer(ServerPlayer* player);
 			void UnregisterPlayer(ServerPlayer* player);
 
-			void UpdateConnectedTransform(ServerEnvironment& environment, const EnvironmentTransform& transform);
+			inline void UpdateConnectedTransform(ServerEnvironment& environment, const EnvironmentTransform& transform);
 
 			ServerEnvironment& operator=(const ServerEnvironment&) = delete;
 			ServerEnvironment& operator=(ServerEnvironment&&) = delete;

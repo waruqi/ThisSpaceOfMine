@@ -6,6 +6,18 @@
 
 namespace tsom
 {
+	inline bool ServerEnvironment::CompareAndUpdateConnectedTransform(ServerEnvironment& environment, const EnvironmentTransform& transform)
+	{
+		auto it = m_connectedEnvironments.find(&environment);
+		NazaraAssertMsg(it != m_connectedEnvironments.end(), "unknown environment");
+
+		if (it.value().ApproxEqual(transform))
+			return false;
+
+		it.value() = transform;
+		return true;
+	}
+
 	template<typename F>
 	void ServerEnvironment::ForEachConnectedEnvironment(F&& callback) const
 	{
@@ -50,5 +62,12 @@ namespace tsom
 	inline const Nz::EnttWorld& ServerEnvironment::GetWorld() const
 	{
 		return *m_world;
+	}
+
+	inline void ServerEnvironment::UpdateConnectedTransform(ServerEnvironment& environment, const EnvironmentTransform& transform)
+	{
+		auto it = m_connectedEnvironments.find(&environment);
+		NazaraAssertMsg(it != m_connectedEnvironments.end(), "unknown environment");
+		it.value() = transform;
 	}
 }

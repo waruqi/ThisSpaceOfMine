@@ -10,9 +10,6 @@
 #include <ServerLib/SessionVisibilityHandler.hpp>
 #include <ServerLib/Components/EnvironmentProxyComponent.hpp>
 #include <Nazara/Core/Components/NodeComponent.hpp>
-#include <entt/entt.hpp>
-
-#include <ServerLib/ServerShipEnvironment.hpp>
 
 namespace tsom
 {
@@ -25,13 +22,15 @@ namespace tsom
 			auto& proxyComponent = view.get<EnvironmentProxyComponent>(entity);
 
 			EnvironmentTransform relativeTransform(nodeComponent.GetPosition(), nodeComponent.GetRotation());
-			proxyComponent.fromEnv->UpdateConnectedTransform(*proxyComponent.toEnv, relativeTransform);
-			proxyComponent.toEnv->UpdateConnectedTransform(*proxyComponent.fromEnv, -relativeTransform);
-
-			proxyComponent.fromEnv->ForEachPlayer([&](ServerPlayer& player)
+			if (proxyComponent.fromEnv->CompareAndUpdateConnectedTransform(*proxyComponent.toEnv, relativeTransform))
 			{
-				player.GetVisibilityHandler().MoveEnvironment(*proxyComponent.toEnv, relativeTransform);
-			});
+				proxyComponent.toEnv->UpdateConnectedTransform(*proxyComponent.fromEnv, -relativeTransform);
+
+				proxyComponent.fromEnv->ForEachPlayer([&](ServerPlayer& player)
+				{
+					player.GetVisibilityHandler().MoveEnvironment(*proxyComponent.toEnv, relativeTransform);
+				});
+			}
 		}
 	}
 }

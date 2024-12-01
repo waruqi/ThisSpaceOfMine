@@ -17,8 +17,7 @@ namespace tsom
 		EnvironmentTransform() = default;
 		inline EnvironmentTransform(const Nz::Vector3f& translation, const Nz::Quaternionf& rotation);
 
-		Nz::Quaternionf rotation;
-		Nz::Vector3f translation;
+		inline bool ApproxEqual(const EnvironmentTransform& other, float translationEpsilon = 0.01f, float rotationEpsilon = 0.001f) const;
 
 		inline Nz::Quaternionf Rotate(const Nz::Quaternionf& localRotation) const;
 		inline Nz::Vector3f Rotate(const Nz::Vector3f& direction) const;
@@ -31,6 +30,9 @@ namespace tsom
 		inline EnvironmentTransform operator-() const;
 
 		static inline EnvironmentTransform Identity();
+
+		Nz::Quaternionf rotation;
+		Nz::Vector3f translation;
 	};
 }
 
