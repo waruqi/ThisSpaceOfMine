@@ -420,7 +420,7 @@ fn VertMain(input: VertIn) -> VertOut
 	{
 		pos *= settings.ShadowPosScale;
 		const if (HasNormal)
-			pos -= input.normal * settings.ShadowMapNormalOffset;
+			pos -= normal * settings.ShadowMapNormalOffset;
 	}
 
 	let worldPosition = instanceData.worldMatrix * vec4[f32](pos, 1.0);
@@ -435,7 +435,7 @@ fn VertMain(input: VertIn) -> VertOut
 		output.color = input.color;
 
 	const if (HasNormal)
-		output.normal = rotationMatrix * input.normal;
+		output.normal = rotationMatrix * normal;
 
 	const if (HasVertexUV)
 		output.uv = input.uv;
