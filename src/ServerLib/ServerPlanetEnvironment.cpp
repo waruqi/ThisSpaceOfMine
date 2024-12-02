@@ -30,7 +30,7 @@ namespace tsom
 {
 	constexpr unsigned int chunkSaveVersion = 1;
 
-	ServerPlanetEnvironment::ServerPlanetEnvironment(ServerInstance& serverInstance, std::filesystem::path savePath, Nz::UInt32 seed, const Nz::Vector3ui& chunkCount) :
+	ServerPlanetEnvironment::ServerPlanetEnvironment(ServerInstance& serverInstance, std::filesystem::path savePath, Nz::UInt32 seed, const Nz::Vector3ui& chunkCount, float cellSize) :
 	ServerEnvironment(serverInstance, ServerEnvironmentType::Planet),
 	m_savePath(std::move(savePath))
 	{
@@ -46,7 +46,7 @@ namespace tsom
 		std::shared_ptr<const EntityClass> planetClass = serverInstance.GetEntityRegistry().FindClass("planet");
 
 		auto& entityInstance = m_planetEntity.emplace<ClassInstanceComponent>(planetClass);
-		entityInstance.UpdateProperty<EntityPropertyType::Float>("CellSize", 1.f);
+		entityInstance.UpdateProperty<EntityPropertyType::Float>("CellSize", cellSize);
 		entityInstance.UpdateProperty<EntityPropertyType::Float>("CornerRadius", 16.f);
 		entityInstance.UpdateProperty<EntityPropertyType::Float>("Gravity", 9.81f);
 
@@ -104,7 +104,7 @@ namespace tsom
 
 	void ServerPlanetEnvironment::OnSave()
 	{
-		if (m_dirtyChunks.empty())
+		if (m_dirtyChunks.empty() || m_savePath.empty())
 			return;
 
 		fmt::print("saving {} dirty chunks...\n", m_dirtyChunks.size());

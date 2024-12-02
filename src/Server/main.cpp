@@ -59,7 +59,7 @@ int ServerMain(int argc, char* argv[])
 	auto& sessionManager = instance.AddSessionManager(serverPort);
 	sessionManager.SetDefaultHandler<tsom::InitialSessionHandler>(std::ref(instance));
 
-	tsom::ServerPlanetEnvironment planet(instance, saveDirectory, 42, Nz::Vector3ui(5));
+	tsom::ServerPlanetEnvironment planet(instance, saveDirectory, 42, Nz::Vector3ui(5), 1.f);
 	instance.SetDefaultSpawnpoint(&planet, Nz::Vector3f::Up() * 100.f + Nz::Vector3f::Backward() * 5.f, Nz::Quaternionf::Identity());
 
 	fmt::print(fg(fmt::color::lime_green), "server ready.\n");
