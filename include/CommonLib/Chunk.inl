@@ -18,7 +18,7 @@ namespace tsom
 
 	inline const Nz::Bitset<Nz::UInt64>& Chunk::GetCollisionCellMask() const
 	{
-		NazaraAssert(!m_blocks.empty(), "chunk has not been reset");
+		NazaraAssertMsg(!m_blocks.empty(), "chunk has not been reset");
 		return m_collisionCellMask;
 	}
 
@@ -43,7 +43,7 @@ namespace tsom
 
 	inline BlockIndex Chunk::GetBlockContent(unsigned int blockIndex) const
 	{
-		NazaraAssert(!m_blocks.empty(), "chunk has not been reset");
+		NazaraAssertMsg(!m_blocks.empty(), "chunk has not been reset");
 		return m_blocks[blockIndex];
 	}
 
@@ -54,7 +54,7 @@ namespace tsom
 
 	inline std::size_t Chunk::GetBlockCount() const
 	{
-		NazaraAssert(!m_blocks.empty(), "chunk has not been reset");
+		NazaraAssertMsg(!m_blocks.empty(), "chunk has not been reset");
 		return m_blocks.size();
 	}
 
@@ -75,7 +75,7 @@ namespace tsom
 
 	inline const BlockIndex* Chunk::GetContent() const
 	{
-		NazaraAssert(!m_blocks.empty(), "chunk has not been reset");
+		NazaraAssertMsg(!m_blocks.empty(), "chunk has not been reset");
 		return m_blocks.data();
 	}
 
