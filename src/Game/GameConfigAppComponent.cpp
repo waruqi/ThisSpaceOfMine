@@ -3,8 +3,8 @@
 // For conditions of distribution and use, see copyright notice in LICENSE
 
 #include <Game/GameConfigAppComponent.hpp>
-#include <Nazara/Core/SystemDirectory.hpp>
 #include <CommonLib/Version.hpp>
+#include <Nazara/Core/SystemDirectory.hpp>
 #include <NazaraUtils/PathUtils.hpp>
 #include <fmt/color.h>
 #include <fmt/format.h>

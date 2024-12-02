@@ -49,7 +49,7 @@ namespace tsom
 
 	void ServerEnvironment::Connect(ServerEnvironment& environment, const EnvironmentTransform& transform)
 	{
-		NazaraAssert(!m_connectedEnvironments.contains(&environment), "environment is already connected");
+		NazaraAssertMsg(!m_connectedEnvironments.contains(&environment), "environment is already connected");
 		m_connectedEnvironments.emplace(&environment, transform);
 
 		environment.ForEachPlayer([&](ServerPlayer& player)
@@ -62,7 +62,7 @@ namespace tsom
 	void ServerEnvironment::Disconnect(ServerEnvironment& environment)
 	{
 		auto it = m_connectedEnvironments.find(&environment);
-		NazaraAssert(it != m_connectedEnvironments.end(), "environment is not connected");
+		NazaraAssertMsg(it != m_connectedEnvironments.end(), "environment is not connected");
 		m_connectedEnvironments.erase(it);
 
 		environment.ForEachPlayer([&](ServerPlayer& player)
@@ -84,13 +84,13 @@ namespace tsom
 
 	void ServerEnvironment::RegisterPlayer(ServerPlayer* player)
 	{
-		NazaraAssert(!m_registeredPlayers.UnboundedTest(player->GetPlayerIndex()), "player was already registered");
+		NazaraAssertMsg(!m_registeredPlayers.UnboundedTest(player->GetPlayerIndex()), "player was already registered");
 		m_registeredPlayers.UnboundedSet(player->GetPlayerIndex());
 	}
 
 	void ServerEnvironment::UnregisterPlayer(ServerPlayer* player)
 	{
-		NazaraAssert(m_registeredPlayers.UnboundedTest(player->GetPlayerIndex()), "player is not registered");
+		NazaraAssertMsg(m_registeredPlayers.UnboundedTest(player->GetPlayerIndex()), "player is not registered");
 		m_registeredPlayers.Reset(player->GetPlayerIndex());
 	}
 }

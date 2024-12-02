@@ -6,9 +6,9 @@
 #include <CommonLib/BlockLibrary.hpp>
 #include <CommonLib/DeformedChunk.hpp>
 #include <CommonLib/FlatChunk.hpp>
-#include <NazaraUtils/CallOnExit.hpp>
 #include <Nazara/Core/TaskScheduler.hpp>
 #include <Nazara/Math/Box.hpp>
+#include <NazaraUtils/CallOnExit.hpp>
 #include <PerlinNoise.hpp>
 
 namespace tsom

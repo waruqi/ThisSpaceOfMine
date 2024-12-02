@@ -390,7 +390,7 @@ namespace tsom
 
 	void Chunk::UpdateBlock(const Nz::Vector3ui& indices, BlockIndex newBlock)
 	{
-		NazaraAssert(!m_blocks.empty(), "chunk has not been reset");
+		NazaraAssertMsg(!m_blocks.empty(), "chunk has not been reset");
 
 		const auto& blockData = m_blockLibrary.GetBlockData(newBlock);
 

@@ -7,8 +7,6 @@
 #include <CommonLib/FlatChunk.hpp>
 #include <CommonLib/GameConstants.hpp>
 #include <Nazara/Physics3D/Collider3D.hpp>
-#include <fmt/format.h>
-#include <random>
 
 namespace tsom
 {

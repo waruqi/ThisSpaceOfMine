@@ -15,8 +15,8 @@
 #include <ClientLib/Components/VisualEntityComponent.hpp>
 #include <ClientLib/Systems/AnimationSystem.hpp>
 #include <ClientLib/Systems/CameraFollowerSystem.hpp>
-#include <CommonLib/GameConstants.hpp>
 #include <CommonLib/DeformedChunk.hpp>
+#include <CommonLib/GameConstants.hpp>
 #include <CommonLib/InternalConstants.hpp>
 #include <CommonLib/NetworkSession.hpp>
 #include <CommonLib/PlayerInputs.hpp>
@@ -678,15 +678,15 @@ namespace tsom
 			OnTick(m_tickDuration, m_tickAccumulator < m_tickDuration);
 		}
 
-		auto& debugDrawer = stateData.world->GetSystem<Nz::RenderSystem>().GetFramePipeline().GetDebugDrawer();
-		//debugDrawer.DrawLine(Nz::Vector3f::Zero(), Nz::Vector3f::Forward() * 20.f, Nz::Color::Green());
-		//debugDrawer.DrawLine(Nz::Vector3f::Zero(), Nz::Vector3f::Left() * 20.f, Nz::Color::Green());
-		//debugDrawer.DrawLine(Nz::Vector3f::Left() * 20.f, Nz::Vector3f::Left() * 20.f + Nz::Vector3f::Forward() * 10.f, Nz::Color::Green());
-		//debugDrawer.DrawLine(Nz::Vector3f::Forward() * 20.f, Nz::Vector3f::Left() * 20.f + Nz::Vector3f::Forward() * 10.f, Nz::Color::Green());
+		Nz::DebugDrawer* debugDrawer = m_cameraEntity.get<Nz::CameraComponent>().AccessDebugDrawer();
+		//debugDrawer->DrawLine(Nz::Vector3f::Zero(), Nz::Vector3f::Forward() * 20.f, Nz::Color::Green());
+		//debugDrawer->DrawLine(Nz::Vector3f::Zero(), Nz::Vector3f::Left() * 20.f, Nz::Color::Green());
+		//debugDrawer->DrawLine(Nz::Vector3f::Left() * 20.f, Nz::Vector3f::Left() * 20.f + Nz::Vector3f::Forward() * 10.f, Nz::Color::Green());
+		//debugDrawer->DrawLine(Nz::Vector3f::Forward() * 20.f, Nz::Vector3f::Left() * 20.f + Nz::Vector3f::Forward() * 10.f, Nz::Color::Green());
 
-		//debugDrawer.DrawBox(Nz::Boxf(Nz::Vector3f(-1.f), Nz::Vector3f(2.f)), Nz::Color::Blue());
-		//debugDrawer.DrawBox(Nz::Boxf(Nz::Vector3f(Nz::Vector3f(m_planet->GetGridDimensions()) * -0.5f * m_planet->GetTileSize()), Nz::Vector3f(Nz::Vector3f(m_planet->GetGridDimensions()) * m_planet->GetTileSize())), Nz::Color::Green());
-		//debugDrawer.DrawFrustum(m_camera.get<Nz::CameraComponent>().GetViewerInsta, Nz::Color::Blue());
+		//debugDrawer->DrawBox(Nz::Boxf(Nz::Vector3f(-1.f), Nz::Vector3f(2.f)), Nz::Color::Blue());
+		//debugDrawer->DrawBox(Nz::Boxf(Nz::Vector3f(Nz::Vector3f(m_planet->GetGridDimensions()) * -0.5f * m_planet->GetTileSize()), Nz::Vector3f(Nz::Vector3f(m_planet->GetGridDimensions()) * m_planet->GetTileSize())), Nz::Color::Green());
+		//debugDrawer->DrawFrustum(m_camera.get<Nz::CameraComponent>().GetViewerInsta, Nz::Color::Blue());
 
 		float cameraSpeed = (Nz::Keyboard::IsKeyPressed(Nz::Keyboard::VKey::LShift)) ? 50.f : 10.f;
 		float updateTime = elapsedTime.AsSeconds();
@@ -698,14 +698,14 @@ namespace tsom
 		{
 			Nz::Vector3f chunkOffset = m_planet->GetChunkOffset(chunk->GetIndices());
 			Nz::Boxf aabb(chunkOffset, Nz::Vector3f(Planet::ChunkSize) * m_planet->GetTileSize());
-			debugDrawer.DrawBox(aabb, Nz::Color::Blue());
+			debugDrawer->DrawBox(aabb, Nz::Color::Blue());
 
 			for (const Nz::Vector3f& corner : aabb.GetCorners())
 			{
 				if (DeformedChunk::DeformPosition(corner, m_planet->GetCenter(), m_planet->GetCornerRadius()).ApproxEqual(corner, 0.001f))
-					debugDrawer.DrawBox(Nz::Boxf(corner - Nz::Vector3f(0.5f), Nz::Vector3f(1.f)), Nz::Color::Red());
+					debugDrawer->DrawBox(Nz::Boxf(corner - Nz::Vector3f(0.5f), Nz::Vector3f(1.f)), Nz::Color::Red());
 				else
-					debugDrawer.DrawBox(Nz::Boxf(corner - Nz::Vector3f(0.5f), Nz::Vector3f(1.f)), Nz::Color::Green());
+					debugDrawer->DrawBox(Nz::Boxf(corner - Nz::Vector3f(0.5f), Nz::Vector3f(1.f)), Nz::Color::Green());
 			}
 		}
 #endif
@@ -856,7 +856,7 @@ namespace tsom
 					const Chunk& hitChunk = *chunkComponent->chunk;
 					const ChunkContainer& chunkContainer = hitChunk.GetContainer();
 
-					debugDrawer.DrawLine(raycastHit->hitPos, raycastHit->hitPos + raycastHit->hitNormal * 0.2f, Nz::Color::Cyan());
+					debugDrawer->DrawLine(raycastHit->hitPos, raycastHit->hitPos + raycastHit->hitNormal * 0.2f, Nz::Color::Cyan());
 
 					if (m_debugOverlay && m_debugOverlay->mode >= 1)
 					{
@@ -910,10 +910,10 @@ namespace tsom
 
 						auto& corners = directionToCorners[hitCoordinates->direction];
 
-						debugDrawer.DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[0]]), chunkNode.ToGlobalPosition(cornerPos[corners[1]]), Nz::Color::Green());
-						debugDrawer.DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[1]]), chunkNode.ToGlobalPosition(cornerPos[corners[2]]), Nz::Color::Green());
-						debugDrawer.DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[2]]), chunkNode.ToGlobalPosition(cornerPos[corners[3]]), Nz::Color::Green());
-						debugDrawer.DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[3]]), chunkNode.ToGlobalPosition(cornerPos[corners[0]]), Nz::Color::Green());
+						debugDrawer->DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[0]]), chunkNode.ToGlobalPosition(cornerPos[corners[1]]), Nz::Color::Green());
+						debugDrawer->DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[1]]), chunkNode.ToGlobalPosition(cornerPos[corners[2]]), Nz::Color::Green());
+						debugDrawer->DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[2]]), chunkNode.ToGlobalPosition(cornerPos[corners[3]]), Nz::Color::Green());
+						debugDrawer->DrawLine(chunkNode.ToGlobalPosition(cornerPos[corners[3]]), chunkNode.ToGlobalPosition(cornerPos[corners[0]]), Nz::Color::Green());
 					}
 				}
 				else if (auto* interactible = raycastHit->hitEntity.try_get<ClientInteractibleComponent>(); interactible && interactible->isEnabled)

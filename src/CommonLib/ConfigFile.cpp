@@ -231,7 +231,7 @@ namespace tsom
 
 	void ConfigFile::RegisterConfig(std::string optionName, ConfigData data)
 	{
-		NazaraAssert(m_optionByName.find(optionName) == m_optionByName.end(), "Option already exists");
+		NazaraAssertMsg(m_optionByName.find(optionName) == m_optionByName.end(), "option %s already exists", optionName.c_str());
 
 		std::size_t optionIndex = m_options.size();
 		auto& option = m_options.emplace_back();

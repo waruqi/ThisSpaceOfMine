@@ -38,7 +38,7 @@ namespace tsom
 
 		m_inputArea->OnTextAreaKeyReturn.Connect([this](const Nz::AbstractTextAreaWidget* textArea, bool* ignoreDefaultAction)
 		{
-			NazaraAssert(textArea == m_inputArea, "Unexpected signal from an other text area");
+			NazaraAssertMsg(textArea == m_inputArea, "unexpected signal from an other text area");
 
 			*ignoreDefaultAction = true;
 
