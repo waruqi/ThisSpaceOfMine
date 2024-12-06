@@ -45,7 +45,7 @@ namespace tsom
 		struct
 		{
 			std::string address;
-			Nz::UInt64 port;
+			Nz::UInt64 port; //< TODO: Change to UInt16 at next token version
 		} gameServer;
 
 		std::vector<Nz::UInt8> privateToken;
