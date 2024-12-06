@@ -8,8 +8,8 @@
 #define TSOM_COMMONLIB_FLATCHUNK_HPP
 
 #include <CommonLib/Chunk.hpp>
-#include <NazaraUtils/FunctionRef.hpp>
 #include <Nazara/Math/Box.hpp>
+#include <NazaraUtils/FunctionRef.hpp>
 
 namespace tsom
 {

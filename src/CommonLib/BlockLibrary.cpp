@@ -74,7 +74,7 @@ namespace tsom
 		RegisterBlock("copper_block", {
 			.basePath = "blocks/copper_block",
 		});
-		
+
 		RegisterBlock("glass", {
 			.basePath = "blocks/glass",
 			.isDoubleSided = true,

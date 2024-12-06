@@ -611,13 +611,6 @@ namespace tsom
 						}
 						else
 						{
-							const Nz::Node* environmentNode = chunkNode.GetParent();
-							if NAZARA_UNLIKELY(!environmentNode)
-							{
-								fmt::print(fg(fmt::color::red), "chunk has no environment node\n");
-								return;
-							}
-
 							BlockIndices blockIndices = chunkContainer.GetBlockIndices(hitChunk.GetIndices(), hitCoordinates->blockIndices);
 
 							const DirectionAxis& dirAxis = s_dirAxis[hitCoordinates->direction];

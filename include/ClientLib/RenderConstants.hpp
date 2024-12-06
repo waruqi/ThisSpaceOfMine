@@ -7,8 +7,8 @@
 #ifndef TSOM_CLIENTLIB_RENDERCONSTANTS_HPP
 #define TSOM_CLIENTLIB_RENDERCONSTANTS_HPP
 
-#include <NazaraUtils/Prerequisites.hpp>
 #include <Nazara/Math/Angle.hpp>
+#include <NazaraUtils/Prerequisites.hpp>
 
 namespace tsom::Constants
 {
