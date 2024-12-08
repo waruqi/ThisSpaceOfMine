@@ -14,9 +14,9 @@ rule("inherit_version", function ()
 end)
 
 add_repositories("nazara-repo https://github.com/NazaraEngine/xmake-repo.git")
---add_requires("nazaraengine >=2023.08.15", { configs = { debug = is_mode("debug"), symbols = true }})
-add_requires("fmt", { configs = { header_only = false }})
-add_requires("libcurl", { configs = { shared = true }, system = false })
+add_requires("nazaraengine >=2023.08.15", { configs = { debug = is_mode("debug"), symbols = true }})
+--add_requires("fmt", { configs = { header_only = false }})
+--add_requires("libcurl", { configs = { shared = true }, system = false })
 --[[add_requires(
 	"concurrentqueue",
 	"cppcodec",
@@ -32,7 +32,7 @@ add_requires("libcurl", { configs = { shared = true }, system = false })
 )]]
 
 if is_plat("windows") then
-	add_requires("stackwalker 5b0df7a4db8896f6b6dc45d36e383c52577e3c6b")
+--	add_requires("stackwalker 5b0df7a4db8896f6b6dc45d36e383c52577e3c6b")
 elseif is_plat("macosx") then
 	add_requires("moltenvk", { configs = { shared = true }})
 end
